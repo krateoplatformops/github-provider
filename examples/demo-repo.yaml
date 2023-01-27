@@ -1,0 +1,14 @@
+apiVersion: github.krateo.io/v1alpha1
+kind: Repo
+metadata:
+  name: github-provider-demo
+spec:
+  apiUrl: https://api.github.com
+  verbose: false
+  credentials:
+    secretRef:
+      namespace: default
+      name: github-secret
+      key: token
+  org: krateoplatformops
+  name: demo-repo-poc
