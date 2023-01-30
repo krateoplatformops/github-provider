@@ -1,12 +1,12 @@
-# github-provider
-
-## Overview
+# Github Provider
 
 This is a [Krateo](https://krateoplatformops.github.io/) Provider that creates and initialize a GitHub repository.
 
 ## Getting Started
 
-You’ll need a Kubernetes cluster to run against. You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.
+You’ll need a Kubernetes cluster to run against. 
+
+> You can use [KIND](https://sigs.k8s.io/kind) to get a local cluster for testing, or run against a remote cluster.
 
 
 ### Running on the cluster
@@ -46,4 +46,4 @@ If you are editing the API definitions, generate the CRDs using:
 $ make generate
 ```
 
-**NOTE:** Run `make --help` for more information on all potential `make` targets
+**NOTE:** Run `make help` for more information on all potential `make` targets
