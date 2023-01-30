@@ -12,3 +12,4 @@ spec:
       key: token
   org: krateoplatformops
   name: demo-repo-poc
+  initialize: true
