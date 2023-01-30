@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/alecthomas/kingpin.v2"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -16,9 +18,14 @@ import (
 	"github.com/krateoplatformops/provider-runtime/pkg/controller"
 )
 
+const (
+	providerName = "Github"
+)
+
 func main() {
 	var (
-		app   = kingpin.New(filepath.Base(os.Args[0]), "Krateo GitHub Provider.").DefaultEnvars()
+		app = kingpin.New(filepath.Base(os.Args[0]), fmt.Sprintf("Krateo %s Provider.", providerName)).
+			DefaultEnvars()
 		debug = app.Flag("debug", "Run with debug logging.").Short('d').
 			OverrideDefaultFromEnvar("DEBUG").
 			Bool()
@@ -42,7 +49,7 @@ func main() {
 	kingpin.MustParse(app.Parse(os.Args[1:]))
 
 	zl := zap.New(zap.UseDevMode(*debug))
-	log := logging.NewLogrLogger(zl.WithName("github-provider"))
+	log := logging.NewLogrLogger(zl.WithName(fmt.Sprintf("%s-provider", strings.ToLower(providerName))))
 	if *debug {
 		// The controller-runtime runs with a no-op logger by default. It is
 		// *very* verbose even at info level, so we only provide it a real
@@ -57,7 +64,7 @@ func main() {
 
 	mgr, err := ctrl.NewManager(cfg, ctrl.Options{
 		LeaderElection:     *leaderElection,
-		LeaderElectionID:   "leader-election-github-provider",
+		LeaderElectionID:   fmt.Sprintf("leader-election-%s-provider", strings.ToLower(providerName)),
 		SyncPeriod:         syncPeriod,
 		MetricsBindAddress: ":8080",
 	})

@@ -1,7 +1,7 @@
 apiVersion: github.krateo.io/v1alpha1
 kind: Repo
 metadata:
-  name: github-provider-demo
+  name: github-provider-sample
 spec:
   apiUrl: https://api.github.com
   verbose: false
