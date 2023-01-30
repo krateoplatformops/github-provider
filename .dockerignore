@@ -2,3 +2,7 @@
 # Ignore build and test binaries.
 bin/
 testbin/
+chart/
+hack/
+samples/
+README.md
