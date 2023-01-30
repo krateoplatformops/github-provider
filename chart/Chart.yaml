@@ -1,5 +1,5 @@
 apiVersion: v2
-name: openstack-service
+name: github-provider
 description: Krateo PlatformOps OpenStack service
 type: application
 icon: "https://github.com/projectkerberus/kerberus-dashboard/blob/main/docs/media/square_black_logo.png"
