@@ -6,6 +6,7 @@ require (
 	github.com/carlmjohnson/requests v0.23.1
 	github.com/krateoplatformops/provider-runtime v0.2.1
 	github.com/pkg/errors v0.9.1
+	github.com/stoewer/go-strcase v1.2.0
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	k8s.io/api v0.26.0
 	k8s.io/apimachinery v0.26.0

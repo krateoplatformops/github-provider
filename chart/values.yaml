@@ -1,8 +1,6 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 1
-
 image:
   repository: ghcr.io/krateoplatformops/github-provider
   pullPolicy: IfNotPresent
@@ -37,19 +35,6 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
-service:
-  create: false
-  type: ClusterIP
-  http:
-    port: 80
-    targetPort: 8080
-  ssh:
-    enabled: false
-  # port: 29418
-  #   rsaKey: |-
-  #     -----BEGIN RSA PRIVATE KEY-----
-  #     -----END RSA PRIVATE KEY-----
-
 podContainerPorts:
   - name: http
     containerPort: 8080
@@ -57,34 +42,11 @@ podContainerPorts:
 
 # put your env variables here
 podEnv:
-  - name: DEBUG
+  - name: GITHUB_PROVIDER_DEBUG
     value: "true"
-  - name: POLL_INTERVAL
+  - name: GITHUB_PROVIDER_POLL_INTERVAL
     value: "2m"
 
-ingress:
-  enabled: false
-  annotations:
-    kubernetes.io/ingress.class: kong
-  host: openstack-service.krateo.site
-  tls:
-    enabled: false
-    secret:
-      create: true
-      # `name` will only be used, if `create` is set to false to bind an
-      # existing secret. Otherwise the name will be automatically generated to
-      # avoid conflicts between multiple chart installations.
-      name:
-    # `cert`and `key` will only be used, if the secret will be created by
-    # this chart.
-    cert: |-
-      -----BEGIN CERTIFICATE-----
-    
-      -----END CERTIFICATE-----
-    key: |-
-      -----BEGIN RSA PRIVATE KEY-----
-    
-      -----END RSA PRIVATE KEY-----
 
 resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -99,16 +61,4 @@ resources:
     memory: "256Mi"
     cpu: "100m"
 
-
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 10
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
+replicaCount: 1

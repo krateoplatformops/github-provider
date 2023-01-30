@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"gopkg.in/alecthomas/kingpin.v2"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -16,6 +15,8 @@ import (
 
 	github "github.com/krateoplatformops/github-provider/internal/controllers"
 	"github.com/krateoplatformops/provider-runtime/pkg/controller"
+
+	"github.com/stoewer/go-strcase"
 )
 
 const (
@@ -23,33 +24,35 @@ const (
 )
 
 func main() {
+	envVarPrefix := fmt.Sprintf("%s_PROVIDER", strcase.UpperSnakeCase(providerName))
+
 	var (
 		app = kingpin.New(filepath.Base(os.Args[0]), fmt.Sprintf("Krateo %s Provider.", providerName)).
 			DefaultEnvars()
 		debug = app.Flag("debug", "Run with debug logging.").Short('d').
-			OverrideDefaultFromEnvar("DEBUG").
+			OverrideDefaultFromEnvar(fmt.Sprintf("%s_DEBUG", envVarPrefix)).
 			Bool()
 		syncPeriod = app.Flag("sync", "Controller manager sync period such as 300ms, 1.5h, or 2h45m").Short('s').
 				Default("1h").
 				Duration()
 		pollInterval = app.Flag("poll", "Poll interval controls how often an individual resource should be checked for drift.").
 				Default("2m").
-				OverrideDefaultFromEnvar("POLL_INTERVAL").
+				OverrideDefaultFromEnvar(fmt.Sprintf("%s_POLL_INTERVAL", envVarPrefix)).
 				Duration()
 		maxReconcileRate = app.Flag("max-reconcile-rate", "The global maximum rate per second at which resources may checked for drift from the desired state.").
 					Default("5").
-					OverrideDefaultFromEnvar("MAX_RECONCILE_RATE").
+					OverrideDefaultFromEnvar(fmt.Sprintf("%s_MAX_RECONCILE_RATE", envVarPrefix)).
 					Int()
 		leaderElection = app.Flag("leader-election", "Use leader election for the controller manager.").
 				Short('l').
 				Default("false").
-				OverrideDefaultFromEnvar("LEADER_ELECTION").
+				OverrideDefaultFromEnvar(fmt.Sprintf("%s_LEADER_ELECTION", envVarPrefix)).
 				Bool()
 	)
 	kingpin.MustParse(app.Parse(os.Args[1:]))
 
 	zl := zap.New(zap.UseDevMode(*debug))
-	log := logging.NewLogrLogger(zl.WithName(fmt.Sprintf("%s-provider", strings.ToLower(providerName))))
+	log := logging.NewLogrLogger(zl.WithName(fmt.Sprintf("%s-provider", strcase.KebabCase(providerName))))
 	if *debug {
 		// The controller-runtime runs with a no-op logger by default. It is
 		// *very* verbose even at info level, so we only provide it a real
@@ -64,7 +67,7 @@ func main() {
 
 	mgr, err := ctrl.NewManager(cfg, ctrl.Options{
 		LeaderElection:     *leaderElection,
-		LeaderElectionID:   fmt.Sprintf("leader-election-%s-provider", strings.ToLower(providerName)),
+		LeaderElectionID:   fmt.Sprintf("leader-election-%s-provider", strcase.KebabCase(providerName)),
 		SyncPeriod:         syncPeriod,
 		MetricsBindAddress: ":8080",
 	})
