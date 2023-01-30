@@ -22,7 +22,7 @@ $ helm install github-provider krateo/github-provider --namespace krateo-system 
 2. Install Instances of Custom Resources:
 
 ```sh
-kubectl apply -f samples/
+$ kubectl apply -f samples/
 ```
 
 ### Test It Out
@@ -30,20 +30,20 @@ kubectl apply -f samples/
 1. Start a local cluster using [KIND](https://sigs.k8s.io/kind):
 
 ```sh
-make kind-up
+$ make kind-up
 ```
 
 2. Run your provider (this will run in the foreground, so switch to a new terminal if you want to leave it running):
 
 ```sh
-make dev
+$ make dev
 ```
 
 ### Modifying the API definitions
 If you are editing the API definitions, generate the CRDs using:
 
 ```sh
-make generate
+$ make generate
 ```
 
 **NOTE:** Run `make --help` for more information on all potential `make` targets
