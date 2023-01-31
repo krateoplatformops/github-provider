@@ -22,8 +22,9 @@ import (
 	"github.com/krateoplatformops/provider-runtime/pkg/resource"
 
 	repov1alpha1 "github.com/krateoplatformops/github-provider/apis/repo/v1alpha1"
+	"github.com/krateoplatformops/github-provider/internal/clients"
 	"github.com/krateoplatformops/github-provider/internal/clients/github"
-	"github.com/krateoplatformops/github-provider/internal/helpers"
+	"github.com/krateoplatformops/provider-runtime/pkg/helpers"
 )
 
 const (
@@ -75,7 +76,7 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 		return nil, fmt.Errorf("no credentials secret referenced")
 	}
 
-	token, err := helpers.GetSecret(ctx, c.kube, csr.DeepCopy())
+	token, err := resource.GetSecret(ctx, c.kube, csr.DeepCopy())
 	if err != nil {
 		return nil, err
 	}
@@ -84,12 +85,12 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 		ApiURL: spec.ApiUrl,
 		Token:  token,
 	}
-	opts.HttpClient = helpers.DefaultHttpClient()
+	opts.HttpClient = clients.DefaultHttpClient()
 
 	verbose := helpers.IsBoolPtrEqualToBool(cr.Spec.Verbose, true)
 	if verbose {
 		opts.HttpClient = &http.Client{
-			Transport: &helpers.VerboseTracer{RoundTripper: http.DefaultTransport},
+			Transport: &clients.VerboseTracer{RoundTripper: http.DefaultTransport},
 			Timeout:   50 * time.Second,
 		}
 	}
