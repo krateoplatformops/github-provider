@@ -1,6 +1,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+labels:
+  component: github-provider
+
 image:
   repository: ghcr.io/krateoplatformops/github-provider
   pullPolicy: IfNotPresent
