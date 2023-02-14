@@ -25,7 +25,7 @@ SED=$(shell which sed)
 
 .PHONY: dev
 dev: generate ## run the controller in debug mode
-	$(KUBECTL) apply -f chart/crds/ -R
+	$(KUBECTL) apply -f crds/ -R
 	go run cmd/main.go -d
 
 .PHONY: generate
