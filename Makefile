@@ -57,6 +57,8 @@ kind-down: ## shuts down the KinD cluster
 demo: ## Run the demo examples
 	@$(KUBECTL) create secret generic github-secret --from-literal=token=$(SAMPLE_TOKEN) || true
 	@$(KUBECTL) apply -f samples/demo-repo.yaml
+	@$(KUBECTL) apply -f samples/demo-collaborator.yaml
+	@$(KUBECTL) apply -f samples/demo-teamRepo.yaml
 
 
 .PHONY: help

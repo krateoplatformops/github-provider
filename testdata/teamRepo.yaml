@@ -1,0 +1,17 @@
+apiVersion: github.krateo.io/v1alpha1
+kind: TeamRepo
+metadata:
+  name: sample
+spec:
+  apiUrl: https://api.github.com
+  verbose: false
+  credentials:
+    secretRef:
+      namespace: demo-system
+      name: github-secret
+      key: token
+  org: lucasepe
+  owner: lucasepe
+  teamSlug: testteam
+  repo: github-provider-sample
+  permission: pull

@@ -4,11 +4,11 @@ metadata:
   name: github-provider
 rules:
   - apiGroups: ["github.krateo.io"]
-    resources: ["repoes"]
+    resources: ["repoes", "teamrepoes", "collaborators"]
     verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
 
   - apiGroups: ["github.krateo.io"]
-    resources: ["repoes/status"]
+    resources: ["repoes/status", "teamrepoes/status", "collaborators/status"]
     verbs: ["get", "patch", "update"]
 
   - apiGroups: [""]
