@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: github-provider
+  namespace: demo-system
+  labels:
+    github-provider: "true"
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      github-provider: "true"
+  template:
+    metadata:
+      labels:
+        github-provider: "true"
+    spec:
+      serviceAccountName: github-provider
+      containers:
+      - name: github-provider
+        image: kind.local/github-provider:latest
+        imagePullPolicy: Never
+        args:
+          - --debug
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 1000

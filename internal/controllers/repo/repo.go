@@ -18,13 +18,13 @@ import (
 
 	"github.com/krateoplatformops/provider-runtime/pkg/event"
 	"github.com/krateoplatformops/provider-runtime/pkg/logging"
-	"github.com/krateoplatformops/provider-runtime/pkg/reconciler/managed"
+	"github.com/krateoplatformops/provider-runtime/pkg/reconciler"
 	"github.com/krateoplatformops/provider-runtime/pkg/resource"
 
 	repov1alpha1 "github.com/krateoplatformops/github-provider/apis/repo/v1alpha1"
 	"github.com/krateoplatformops/github-provider/internal/clients"
 	"github.com/krateoplatformops/github-provider/internal/clients/github"
-	"github.com/krateoplatformops/provider-runtime/pkg/helpers"
+	"github.com/krateoplatformops/provider-runtime/pkg/ptr"
 )
 
 const (
@@ -33,28 +33,28 @@ const (
 
 // Setup adds a controller that reconciles Token managed resources.
 func Setup(mgr ctrl.Manager, o controller.Options) error {
-	name := managed.ControllerName(repov1alpha1.RepoGroupKind)
+	name := reconciler.ControllerName(repov1alpha1.RepoGroupKind)
 
 	log := o.Logger.WithValues("controller", name)
 
 	recorder := mgr.GetEventRecorderFor(name)
 
-	r := managed.NewReconciler(mgr,
+	r := reconciler.NewReconciler(mgr,
 		resource.ManagedKind(repov1alpha1.RepoGroupVersionKind),
-		managed.WithExternalConnecter(&connector{
+		reconciler.WithExternalConnecter(&connector{
 			kube:     mgr.GetClient(),
 			log:      log,
 			recorder: recorder,
 		}),
-		managed.WithPollInterval(o.PollInterval),
-		managed.WithLogger(log),
-		managed.WithRecorder(event.NewAPIRecorder(recorder)))
+		reconciler.WithPollInterval(o.PollInterval),
+		reconciler.WithLogger(log),
+		reconciler.WithRecorder(event.NewAPIRecorder(recorder)))
 
 	return ctrl.NewControllerManagedBy(mgr).
 		Named(name).
 		WithOptions(o.ForControllerRuntime()).
 		For(&repov1alpha1.Repo{}).
-		Complete(ratelimiter.NewReconciler(name, r, o.GlobalRateLimiter))
+		Complete(ratelimiter.New(name, r, o.GlobalRateLimiter))
 }
 
 type connector struct {
@@ -63,7 +63,7 @@ type connector struct {
 	recorder record.EventRecorder
 }
 
-func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
+func (c *connector) Connect(ctx context.Context, mg resource.Managed) (reconciler.ExternalClient, error) {
 	cr, ok := mg.(*repov1alpha1.Repo)
 	if !ok {
 		return nil, errors.New(errNotRepo)
@@ -87,8 +87,7 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	}
 	opts.HttpClient = clients.DefaultHttpClient()
 
-	verbose := helpers.IsBoolPtrEqualToBool(cr.Spec.Verbose, true)
-	if verbose {
+	if ptr.Deref(cr.Spec.Verbose, false) {
 		opts.HttpClient = &http.Client{
 			Transport: &clients.VerboseTracer{RoundTripper: http.DefaultTransport},
 			Timeout:   50 * time.Second,
@@ -112,17 +111,21 @@ type external struct {
 	rec   record.EventRecorder
 }
 
-func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
+func (c *external) Disconnect(_ context.Context) error {
+	return nil // NOOP
+}
+
+func (e *external) Observe(ctx context.Context, mg resource.Managed) (reconciler.ExternalObservation, error) {
 	cr, ok := mg.(*repov1alpha1.Repo)
 	if !ok {
-		return managed.ExternalObservation{}, errors.New(errNotRepo)
+		return reconciler.ExternalObservation{}, errors.New(errNotRepo)
 	}
 
 	spec := cr.Spec.DeepCopy()
 
 	ok, err := e.ghCli.Repos().Exists(spec)
 	if err != nil {
-		return managed.ExternalObservation{}, err
+		return reconciler.ExternalObservation{}, err
 	}
 
 	if ok {
@@ -130,7 +133,7 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 		e.rec.Eventf(cr, corev1.EventTypeNormal, "AlredyExists", "Repo '%s/%s' already exists", spec.Org, spec.Name)
 
 		cr.SetConditions(prv1.Available())
-		return managed.ExternalObservation{
+		return reconciler.ExternalObservation{
 			ResourceExists:   true,
 			ResourceUpToDate: true,
 		}, nil
@@ -138,7 +141,7 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 
 	e.log.Debug("Repo does not exists", "org", spec.Org, "name", spec.Name)
 
-	return managed.ExternalObservation{
+	return reconciler.ExternalObservation{
 		ResourceExists:   false,
 		ResourceUpToDate: true,
 	}, nil

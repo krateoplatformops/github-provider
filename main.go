@@ -5,8 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"gopkg.in/alecthomas/kingpin.v2"
+	"github.com/alecthomas/kingpin/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/krateoplatformops/github-provider/apis"
@@ -15,6 +16,7 @@ import (
 
 	github "github.com/krateoplatformops/github-provider/internal/controllers"
 	"github.com/krateoplatformops/provider-runtime/pkg/controller"
+	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	"github.com/stoewer/go-strcase"
 )
@@ -66,10 +68,14 @@ func main() {
 	kingpin.FatalIfError(err, "Cannot get API server rest config")
 
 	mgr, err := ctrl.NewManager(cfg, ctrl.Options{
-		LeaderElection:     *leaderElection,
-		LeaderElectionID:   fmt.Sprintf("leader-election-%s-provider", strcase.KebabCase(providerName)),
-		SyncPeriod:         syncPeriod,
-		MetricsBindAddress: ":8080",
+		LeaderElection:   *leaderElection,
+		LeaderElectionID: fmt.Sprintf("leader-election-%s-provider", strcase.KebabCase(providerName)),
+		Cache: cache.Options{
+			SyncPeriod: syncPeriod,
+		},
+		Metrics: metricsserver.Options{
+			BindAddress: ":8080",
+		},
 	})
 	kingpin.FatalIfError(err, "Cannot create controller manager")
 
