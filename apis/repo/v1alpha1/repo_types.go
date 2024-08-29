@@ -2,13 +2,12 @@ package v1alpha1
 
 import (
 	prv1 "github.com/krateoplatformops/provider-runtime/apis/common/v1"
+	"github.com/krateoplatformops/provider-runtime/pkg/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // RepoSpec defines the desired state of Repo
 type RepoSpec struct {
-	prv1.ManagedSpec `json:",inline"`
-
 	// ApiUrl: the baseUrl for the REST API provider.
 	// +optional
 	// +immutable
@@ -40,7 +39,7 @@ type RepoSpec struct {
 
 // RepoStatus defines the observed state of Repo
 type RepoStatus struct {
-	prv1.ManagedStatus `json:",inline"`
+	prv1.ConditionedStatus `json:",inline"`
 
 	// Url: repository URL.
 	Url *string `json:"url,omitempty"`
@@ -51,7 +50,7 @@ type RepoStatus struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
-//+kubebuilder:resource:scope=Cluster,categories={krateo,github}
+//+kubebuilder:resource:scope=Namespaced,categories={krateo,github}
 //+kubebuilder:printcolumn:name="READY",type="string",JSONPath=".status.conditions[?(@.type=='Ready')].status"
 //+kubebuilder:printcolumn:name="SYNCED",type="string",JSONPath=".status.conditions[?(@.type=='Synced')].status"
 
@@ -64,6 +63,16 @@ type Repo struct {
 	Status RepoStatus `json:"status,omitempty"`
 }
 
+// GetCondition of this Repo.
+func (mg *Repo) GetCondition(ct prv1.ConditionType) prv1.Condition {
+	return mg.Status.GetCondition(ct)
+}
+
+// SetConditions of this Repo.
+func (mg *Repo) SetConditions(c ...prv1.Condition) {
+	mg.Status.SetConditions(c...)
+}
+
 //+kubebuilder:object:root=true
 
 // RepoList contains a list of Repo
@@ -71,4 +80,13 @@ type RepoList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Repo `json:"items"`
+}
+
+// GetItems of this RepoList.
+func (l *RepoList) GetItems() []resource.Managed {
+	items := make([]resource.Managed, len(l.Items))
+	for i := range l.Items {
+		items[i] = &l.Items[i]
+	}
+	return items
 }

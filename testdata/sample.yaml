@@ -1,0 +1,30 @@
+apiVersion: github.krateo.io/v1alpha1
+kind: Repo
+metadata:
+  name: sample
+  namespace: demo-system
+  annotations:
+    # krateo.io/management-policy:
+    #
+    # - default: the provider can fully manage the resource (this is the default policy)
+    # - observe: the provider can only observe the resource
+    # - observe-delete: the provider can observe or delete the resource, but can not create and update it
+    # - observe-create-update: the provider can observe, create, or update the resource, but can not delete it
+    krateo.io/management-policy: default
+
+    # krateo.io/deletion-policy:
+    #
+    # - delete: the external resource will be deleted when its managed resource is deleted (this is the default policy)
+    # - orphan: the external resource will orphaned when its managed resource is deleted
+    krateo.io/deletion-policy: delete
+spec:
+  apiUrl: https://api.github.com
+  verbose: false
+  credentials:
+    secretRef:
+      namespace: demo-system
+      name: github-secret
+      key: token
+  org: lucasepe
+  name: github-provider-sample
+  initialize: true
