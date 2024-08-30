@@ -5,7 +5,7 @@ go 1.23.0
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
 	github.com/carlmjohnson/requests v0.24.2
-	github.com/krateoplatformops/provider-runtime v0.8.2-0.20240828151548-291f3889fbe4
+	github.com/krateoplatformops/provider-runtime v0.9.0
 	github.com/stoewer/go-strcase v1.3.0
 	k8s.io/api v0.31.0
 	k8s.io/apimachinery v0.31.0
