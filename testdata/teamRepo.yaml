@@ -2,6 +2,7 @@ apiVersion: github.krateo.io/v1alpha1
 kind: TeamRepo
 metadata:
   name: sample
+  namespace: demo-system
 spec:
   apiUrl: https://api.github.com
   verbose: false
