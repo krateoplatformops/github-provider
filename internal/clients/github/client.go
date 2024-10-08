@@ -34,10 +34,12 @@ type ClientOpts struct {
 
 // Client is a tiny Github client
 type Client struct {
-	apiUrl       string
-	apiExtraPath string
-	httpClient   *http.Client
-	repos        *RepoService
+	apiUrl        string
+	apiExtraPath  string
+	httpClient    *http.Client
+	repos         *RepoService
+	collaborators *CollaboratorService
+	teamRepo     *TeamRepoService
 }
 
 // NewClient returns a new Github Client
@@ -60,10 +62,19 @@ func NewClient(opts ClientOpts) *Client {
 	}
 
 	res.repos = newRepoService(res.httpClient, res.apiUrl, res.apiExtraPath, opts.Token)
+	res.collaborators = newCollaboratorService(res.httpClient, res.apiUrl, res.apiExtraPath, opts.Token)
+	res.teamRepo = newTeamRepoService(res.httpClient, res.apiUrl, res.apiExtraPath, opts.Token)
 
 	return res
 }
 
 func (c *Client) Repos() *RepoService {
 	return c.repos
+}
+
+func (c *Client) Collaborators() *CollaboratorService {
+	return c.collaborators
+}
+func (c *Client) TeamRepo() *TeamRepoService {
+	return c.teamRepo
 }
